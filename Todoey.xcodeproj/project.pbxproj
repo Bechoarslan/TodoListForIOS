@@ -41,6 +41,7 @@
 				AppDelegate.swift,
 				Assets.xcassets,
 				Controller/CategoryViewController.swift,
+				Controller/SwipeTableViewController.swift,
 				Controller/TodoListViewController.swift,
 				"Data Model/Item.xcdatamodeld",
 			);
@@ -358,7 +359,7 @@
 				DEVELOPMENT_TEAM = 5Q248942NP;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = Todoey/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -379,7 +380,7 @@
 				DEVELOPMENT_TEAM = 5Q248942NP;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = Todoey/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

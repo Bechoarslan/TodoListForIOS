@@ -7,23 +7,30 @@
 //
 
 import UIKit
-import RealmSwift
 import CoreData
-import SwipeCellKit
-class CategoryViewController: UITableViewController {
+import ChameleonFramework
+class CategoryViewController: SwipeTableViewController {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var categoryArray = [Category]()
+    
    //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         CoreloadData()
         tableView.rowHeight = 80
+        tableView.separatorStyle = .none
     }
 
     
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {
+            fatalError()
+        }
+        navBar.backgroundColor = UIColor(hexString: "1D9BF6")
     
+        
+    }
 
  //MARK:  - Table View Configuration
     
@@ -32,10 +39,10 @@ class CategoryViewController: UITableViewController {
     }
    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToCategoryIdentifier", for: indexPath) as! SwipeTableViewCell
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categoryArray[indexPath.row].name
-        cell.delegate = self
-
+        cell.backgroundColor = UIColor(hexString: categoryArray[indexPath.row].colorString!)
+   
         return cell
         
     }
@@ -49,10 +56,10 @@ class CategoryViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
             let newCategory = Category(context: self.context)
             newCategory.name = alertTextField.text!
-            
+            newCategory.colorString = UIColor.randomFlat().hexValue()
            
             self.categoryArray.append(newCategory)
-            self.CoreDatesave(category: newCategory)
+            self.CoreDatesave()
             //self.save(category : category)
             
         }
@@ -88,7 +95,7 @@ class CategoryViewController: UITableViewController {
     //MARK: - Save Data and Load Data
     
     
-    func CoreDatesave(category : Category)
+    func CoreDatesave()
     {
         do
         {
@@ -116,32 +123,18 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
-}
-
-extension CategoryViewController : SwipeTableViewCellDelegate
-{
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            // handle action by updating model with deletion
-            self.context.delete(self.categoryArray[indexPath.row])
-            self.categoryArray.remove(at: indexPath.row)
-            //tableView.reloadData()
+    override func deleteCoreData(at indexPath: IndexPath) {
+        context.delete(categoryArray[indexPath.row])
+        categoryArray.remove(at: indexPath.row)
+        do
+        {
+            try context.save()
+            
         }
-       
-        // customize the action appearance
-        deleteAction.image = UIImage(named: "delete-icon")
-
-        return [deleteAction]
+        catch {
+            print(error)
+        }
+        
     }
-    
-    
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
-        options.expansionStyle = .destructive
-        return options
-    }
-
     
 }

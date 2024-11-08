@@ -8,16 +8,19 @@
 
 import UIKit
 import CoreData
-class TodoListViewController: UITableViewController {
+import ChameleonFramework
+class TodoListViewController: SwipeTableViewController {
     
     var itemArray = [Item]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
    
+    @IBOutlet weak var searchBar: UISearchBar!
     //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     var selectedCategory : Category? {
         didSet {
             CoreDataloadItems()
+            tableView.separatorStyle = .none
         }
     }
     
@@ -28,15 +31,33 @@ class TodoListViewController: UITableViewController {
         // Do any additional setup after loading the view.
     }
     
+    override func viewWillAppear(_ animated: Bool)
+    {
+        if let colour = selectedCategory?.colorString {
+            title = selectedCategory!.name
+            guard let nav = navigationController?.navigationBar else {fatalError("Could not find any navigation bar")}
+            if let navBarColor = UIColor(hexString: colour) {
+                nav.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColor, returnFlat: true)]
+                nav.barTintColor = navBarColor
+                nav.tintColor = navBarColor
+                searchBar.backgroundColor = navBarColor
+            }
+        }
+    }
+    
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoListIdentifier", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = itemArray[indexPath.row].title
         cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
+        cell.backgroundColor = UIColor(hexString: selectedCategory!.colorString!)?.darken(byPercentage:
+         CGFloat(indexPath.row) / CGFloat(itemArray.count)
+        )
+        cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
         return cell
         
         
@@ -124,6 +145,22 @@ func CoreDataloadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(),
     
             tableView.reloadData()
         }
+    
+    override func deleteCoreData(at indexPath: IndexPath)
+    {
+        context.delete(itemArray[indexPath.row])
+        itemArray.remove(at: indexPath.row)
+        do {
+            try context.save()
+        }
+        catch
+        {
+            print(error)
+        }
+
+    }
+    
+   
     
 
     
